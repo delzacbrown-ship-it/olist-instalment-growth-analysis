@@ -1,0 +1,2 @@
+r_income_vs_installment,r_squared_linear,linear_slope,linear_intercept,r_log_income_vs_installment,r_squared_log_linear,log_linear_slope,log_linear_intercept,r_income_vs_cancellation,r_gini_vs_installment,r_gini_vs_cancellation,n_states
+-0.668051,0.446293,-2e-06,0.629773,-0.755669,0.571036,-0.093979,1.513393,0.023551,0.374873,-0.143781,27
