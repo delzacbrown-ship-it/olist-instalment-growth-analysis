@@ -1,6 +1,6 @@
 # olist-instalment-growth-analysis
 
-SQL and Python growth analysis of the Olist Brazilian e-commerce dataset. Tests whether instalment payments are a monetisation lever Olist is leaving on the table, using cohort retention, RFM segmentation, and a state-level income correlation. Decision memo included.
+SQL growth analysis of the Olist Brazilian e-commerce dataset. Tests whether instalment payments are a monetisation lever Olist is leaving on the table, using cohort retention, RFM segmentation, and a state-level income correlation. Decision memo included.
 
 # Olist Instalment Growth Analysis
 
@@ -42,8 +42,8 @@ Not that Olist should become a payment gateway; its position as a middle layer b
 - **Pipeline:** a numbered sequence of DuckDB SQL scripts (01 through 13), each producing a CSV consumed by the next stage or by the final report.
 - **Four core deliverables:** cohort retention, funnel breakdown, RFM segmentation, and the decision memo.
 - **State-level income correlation:** PIB per capita and Gini figures sourced from IBGE (SIDRA Tabelas 6784 and 7435, 2017-2018), joined against state-level instalment and cancellation rates. Run across all 27 states, with no minimum-volume exclusion.
-- **Cross-validation:** correlation and regression figures reproduced independently in both DuckDB (native `CORR`/`REGR_SLOPE`/`REGR_INTERCEPT`) and Python/scipy, matching to within float rounding.
-- **Robustness checks:** Spearman's rank correlation (ρ = −0.78) and a log-linear vs linear model comparison, run to test whether the income relationship holds up to outliers and functional form. Excluding DF, the strongest-income state, strengthens rather than weakens the relationship.
+- **Correlation and regression:** linear and log-linear Pearson correlations, R², slope and intercept computed natively in DuckDB using `CORR`/`REGR_SLOPE`/`REGR_INTERCEPT` on the raw and log-transformed income columns.
+- **Robustness checks:** a log-linear vs linear model comparison, run to test whether the income relationship holds up to functional form, plus a Spearman rank correlation (ρ = −0.78) as an outlier check — not a native DuckDB computation, so treat it as a figure to re-verify. Excluding DF, the strongest-income state, strengthens rather than weakens the relationship.
 
 ## Stated limitations
 
@@ -66,4 +66,4 @@ Not that Olist should become a payment gateway; its position as a middle layer b
 
 ## Tools
 
-DuckDB (SQL), Python (pandas, scipy for cross-validation), IBGE SIDRA (state income/Gini data).
+DuckDB (SQL), IBGE SIDRA (state income/Gini data).
