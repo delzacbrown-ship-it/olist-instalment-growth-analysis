@@ -1,11 +1,16 @@
 # olist-instalment-growth-analysis
+
 SQL and Python growth analysis of the Olist Brazilian e-commerce dataset. Tests whether instalment payments are a monetisation lever Olist is leaving on the table, using cohort retention, RFM segmentation, and a state-level income correlation. Decision memo included.
 
 # Olist Instalment Growth Analysis
 
 A growth analyst case study built on the [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) (~99,440 orders, Sept 2016 to Oct 2018). The core question: does Olist's data support treating instalment payments as a growth lever rather than a risk to be managed. The analysis is written up as a retrospective decision memo addressed to Olist leadership.
 
-**[Read the decision memo](./olist_DA_report.pdf)** · **[Interactive dashboard](./olist_dashboard.html)**
+**[Read the decision memo](olist_DA_report.pdf)** · **[Interactive dashboard](olist_dashboard.html)**
+
+## The finding in one sentence
+
+Two thirds of Olist's revenue comes from customers paying in instalments, Olist earns nothing from the payment itself, and the cheapest way to test whether that is worth anything is to negotiate a better processing rate with the payment partners Olist already uses — before building anything.
 
 ## Summary
 
@@ -13,17 +18,18 @@ Instalment payments already carry the majority of Olist's revenue: 51.5% of orde
 
 ## Key findings
 
-| Finding | Result |
-|---|---|
-| Instalment share of orders vs revenue | 51.5% of orders, 63.5% of revenue |
-| Avg order value, instalment vs single payment | R$198.68 vs R$121.04 (+64.1%) |
-| Median order value, instalment vs single payment | R$134.90 vs R$79.51 (+69.7%) |
-| Cancellation rate, instalment customers vs baseline | 52.16% vs 52.09% baseline (no elevated risk) |
-| Income vs cancellation correlation | r = 0.04 across 24 states (no relationship) |
-| Repeat rate, instalment-majority vs single-payment-majority customers | 3.84% vs 2.34% |
-| Revenue concentration | 96.88% of customers order once, generate 94.1% of revenue |
-| Income vs instalment usage (state level) | r = -0.73 linear (R² = 0.53), r = -0.81 log-linear (R² = 0.66) |
-| Inequality (Gini) vs instalment usage | r = 0.56 |
+| Finding | Result | What it means |
+| --- | --- | --- |
+| Instalment share of orders vs revenue | 51.5% of orders, 63.5% of revenue | Half the orders, two thirds of the money |
+| Avg order value, instalment vs single payment | R$198.68 vs R$121.04 (+64.1%) | Instalment orders are substantially bigger |
+| Median order value, instalment vs single payment | R$134.90 vs R$79.51 (+69.7%) | Not driven by a few outliers — the whole distribution sits higher |
+| Cancellation rate, instalment orders vs baseline | 48.3% of cancellations vs 51.5% baseline (p = 0.12) | No elevated cancellation risk; the small gap is not statistically significant |
+| Income vs cancellation correlation | r = 0.02 across 27 states | No relationship — poorer regions are not absorbing hidden risk |
+| Repeat rate, instalment-majority vs single-payment-majority customers | 3.84% vs 2.34% | Instalment users come back more often |
+| Instalment usage, repeat customers vs whole base | 63.6% vs 51.6% | The same relationship seen from the other direction |
+| Revenue concentration | 96.9% of customers order once, generating 94.1% of revenue | Growth here is an acquisition story, not a retention story |
+| Income vs instalment usage (state level) | r = −0.67 linear (R² = 0.45), r = −0.76 log-linear (R² = 0.57), n = 27 | Lower-income states use instalments more, but usage flattens rather than falling to zero |
+| Inequality (Gini) vs instalment usage | r = 0.37 (p = 0.054) | Points the same way, but only borderline significant — a secondary signal |
 
 Full detail, caveats, and what each finding does *not* establish are in the memo and in `FINDINGS_LOG.md`.
 
@@ -33,17 +39,18 @@ Not that Olist should become a payment gateway; its position as a middle layer b
 
 ## Methodology
 
-- **Pipeline:** a numbered sequence of DuckDB SQL scripts (00 diagnostics through 12), each producing a CSV consumed by the next stage or by the final report.
+- **Pipeline:** a numbered sequence of DuckDB SQL scripts (01 through 13), each producing a CSV consumed by the next stage or by the final report.
 - **Four core deliverables:** cohort retention, funnel breakdown, RFM segmentation, and the decision memo.
-- **State-level income correlation:** PIB per capita and Gini figures sourced from IBGE (SIDRA Tabelas 6784 and 7435, 2017-2018), joined against state-level instalment and cancellation rates.
+- **State-level income correlation:** PIB per capita and Gini figures sourced from IBGE (SIDRA Tabelas 6784 and 7435, 2017-2018), joined against state-level instalment and cancellation rates. Run across all 27 states, with no minimum-volume exclusion.
 - **Cross-validation:** correlation and regression figures reproduced independently in both DuckDB (native `CORR`/`REGR_SLOPE`/`REGR_INTERCEPT`) and Python/scipy, matching to within float rounding.
-- **Robustness checks:** Spearman's rank correlation and a log-linear vs linear model comparison, run to test whether the income relationship holds up to outliers and functional form.
+- **Robustness checks:** Spearman's rank correlation (ρ = −0.78) and a log-linear vs linear model comparison, run to test whether the income relationship holds up to outliers and functional form. Excluding DF, the strongest-income state, strengthens rather than weakens the relationship.
 
 ## Stated limitations
 
 - The income relationship is measured between states, not between individual customers. Olist's data has no individual income field, so this cannot be extended to customer-level claims without risking an ecological fallacy.
 - Cancellation and instalment default are different things. The dataset only records the former; nothing here speaks to repayment or credit risk.
 - The instalment-to-order-value association is real and consistent but not shown to be causal in either direction.
+- The cost side of the recommendation is unmeasured. Processing fees by instalment count, settlement timing, and non-completion rates are not in this dataset and would need to be obtained before any commitment beyond negotiation.
 
 ## Repo structure
 
@@ -51,16 +58,12 @@ Not that Olist should become a payment gateway; its position as a middle layer b
 ├── olist_DA_report.pdf        # Decision memo (final deliverable)
 ├── olist_dashboard.html       # Interactive companion to the memo
 ├── FINDINGS_LOG.md            # Working log of every question investigated, including ones not in the final memo
-├── sql/                       # Numbered DuckDB pipeline (00 to 12)
-└── data/                      # Output CSVs from each pipeline stage
+├── SQL/                       # Numbered DuckDB pipeline (01 to 13)
+├── new_csv/                   # Output CSVs from each pipeline stage
+├── Brazil income data/        # IBGE state income and Gini source data
+└── Brazilian E-Commerce Public Dataset by Olist/   # Raw source dataset
 ```
-
-*(Update the tree above to match your actual folder layout when you push.)*
 
 ## Tools
 
 DuckDB (SQL), Python (pandas, scipy for cross-validation), IBGE SIDRA (state income/Gini data).
-
----
-
-This repo is being updated with newer data and additional pipeline stages; the memo and findings log above reflect the most recent completed analysis.
